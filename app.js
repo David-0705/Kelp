@@ -1,15 +1,10 @@
-// app.js
 const fs = require("fs");
 const readline = require("readline");
 const path = require("path");
-const dotenv = require("dotenv");
-dotenv.config();
-
 const { pool, ensureTable } = require("./db");
 const { parseCSVLineToFields, isRecordComplete } = require("./csvParser");
-const { setNested, printAgeDistribution } = require("./utils");
+const { setNested } = require("./utils");
 
-const CSV_PATH = process.env.CSV_PATH || "./data/users.csv";
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || process.env.BATCHSIZE || "1000", 10);
 
 async function processCSVFile(csvPath) {
@@ -24,21 +19,15 @@ async function processCSVFile(csvPath) {
   let headerCount = 0;
   let batchRows = [];
   let totalProcessed = 0;
-  const ageCounters = { lt20: 0, b20_40: 0, b40_60: 0, gt60: 0 };
 
   async function flushBatch() {
-    if (batchRows.length === 0) return;
+    if (!batchRows.length) return;
 
     const params = [];
     let paramIndex = 1;
     const placeholders = batchRows
       .map((row) => {
-        params.push(
-          row.name,
-          row.age,
-          JSON.stringify(row.address || null),
-          JSON.stringify(row.additional_info || null)
-        );
+        params.push(row.name, row.age, JSON.stringify(row.address || null), JSON.stringify(row.additional_info || null));
         const place = `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3})`;
         paramIndex += 4;
         return place;
@@ -49,12 +38,7 @@ async function processCSVFile(csvPath) {
     console.log("✅ JSON file written to output.json");
 
     const sql = `INSERT INTO public.users ("name", age, address, additional_info) VALUES ${placeholders};`;
-    try {
-      await pool.query(sql, params);
-    } catch (err) {
-      console.error("DB insert error:", err);
-      throw err;
-    }
+    await pool.query(sql, params);
 
     totalProcessed += batchRows.length;
     batchRows = [];
@@ -78,9 +62,7 @@ async function processCSVFile(csvPath) {
       const required = ["name.firstName", "name.lastName", "age"];
       for (let i = 0; i < required.length; i++) {
         if (!headers[i] || headers[i] !== required[i]) {
-          throw new Error(
-            `Header validation failed. Expected header[${i}]="${required[i]}", got "${headers[i]}"`
-          );
+          throw new Error(`Header validation failed. Expected header[${i}]="${required[i]}", got "${headers[i]}"`);
         }
       }
       isFirstRecord = false;
@@ -90,9 +72,7 @@ async function processCSVFile(csvPath) {
     while (fields.length < headerCount) fields.push("");
 
     const mapped = {};
-    for (let i = 0; i < headerCount; i++) {
-      mapped[headers[i]] = fields[i] || "";
-    }
+    for (let i = 0; i < headerCount; i++) mapped[headers[i]] = fields[i] || "";
 
     const firstName = mapped["name.firstName"] || "";
     const lastName = mapped["name.lastName"] || "";
@@ -100,24 +80,14 @@ async function processCSVFile(csvPath) {
 
     const ageRaw = mapped["age"] || "";
     const age = parseInt(ageRaw.toString().trim(), 10);
-    if (Number.isNaN(age)) {
-      throw new Error(
-        `Invalid age value for record #${totalProcessed + batchRows.length + 1}: "${ageRaw}"`
-      );
-    }
+    if (Number.isNaN(age)) throw new Error(`Invalid age value: "${ageRaw}"`);
 
     const addressObj = {};
     const additionalInfo = {};
-
     for (const [key, value] of Object.entries(mapped)) {
-      if (key === "name.firstName" || key === "name.lastName" || key === "age") continue;
-      if (key.startsWith("address.")) {
-        const path = key.split(".").slice(1);
-        setNested(addressObj, path, value);
-      } else {
-        const path = key.split(".");
-        setNested(additionalInfo, path, value);
-      }
+      if (["name.firstName", "name.lastName", "age"].includes(key)) continue;
+      if (key.startsWith("address.")) setNested(addressObj, key.split(".").slice(1), value);
+      else setNested(additionalInfo, key.split("."), value);
     }
 
     batchRows.push({
@@ -127,38 +97,42 @@ async function processCSVFile(csvPath) {
       additional_info: Object.keys(additionalInfo).length ? additionalInfo : null,
     });
 
-    if (age < 20) ageCounters.lt20++;
-    else if (age >= 20 && age <= 40) ageCounters.b20_40++;
-    else if (age > 40 && age <= 60) ageCounters.b40_60++;
-    else ageCounters.gt60++;
-
     if (batchRows.length >= BATCH_SIZE) await flushBatch();
   }
 
   await flushBatch();
-  printAgeDistribution(ageCounters);
-  return { totalProcessed, ageCounters };
-}
+  console.log(`✅ CSV processed. Total rows inserted: ${totalProcessed}`);
 
-// Auto-run if executed directly
-if (require.main === module) {
-  (async () => {
-    const csvAbsPath = path.resolve(CSV_PATH);
-    try {
-      if (fs.existsSync(csvAbsPath)) {
-        console.log("CSV file found, starting processing automatically:", csvAbsPath);
-        const result = await processCSVFile(csvAbsPath);
-        console.log("Done:", result);
-      } else {
-        console.log("CSV file not found at:", csvAbsPath);
-      }
-    } catch (err) {
-      console.error("Fatal error:", err);
-      process.exit(1);
-    } finally {
-      await pool.end();
-    }
-  })();
-}
+  // ---------------- Get age distribution from DB ----------------
+//   const distributionSql = `
+//     SELECT
+//       SUM(CASE WHEN age < 20 THEN 1 ELSE 0 END) AS lt20,
+//       SUM(CASE WHEN age >= 20 AND age <= 40 THEN 1 ELSE 0 END) AS b20_40,
+//       SUM(CASE WHEN age > 40 AND age <= 60 THEN 1 ELSE 0 END) AS b40_60,
+//       SUM(CASE WHEN age > 60 THEN 1 ELSE 0 END) AS gt60
+//     FROM public.users;
+//   `;
+//   const { rows } = await pool.query(distributionSql);
+//   const ageDistribution = rows[0];
+//   console.log("✅ Age distribution from DB:", ageDistribution);
 
+//   return { totalProcessed, ageDistribution };
+// }
+
+const distributionSql = `
+  SELECT
+    SUM(CASE WHEN age < 20 THEN 1 ELSE 0 END) AS "<20",
+    SUM(CASE WHEN age >= 20 AND age <= 40 THEN 1 ELSE 0 END) AS "20-40",
+    SUM(CASE WHEN age > 40 AND age <= 60 THEN 1 ELSE 0 END) AS "41-60",
+    SUM(CASE WHEN age > 60 THEN 1 ELSE 0 END) AS ">60"
+  FROM public.users;
+`;
+
+const { rows } = await pool.query(distributionSql);
+const ageDistribution = rows[0];
+
+// Print in table format
+console.log("\n✅ Age distribution (from DB):");
+console.table([ageDistribution]);
+}
 module.exports = { processCSVFile };
