@@ -27,6 +27,10 @@ You can use `curl`, Postman, or any HTTP client to POST to `http://localhost:300
 ## Sample output
 Below are the example screenshots from this project's outputs:
 
+- CSV File:
+
+![CSV File](readmeImage/csv.png)
+
 - API request/response (Postman):
 
 ![API Request/Response](readmeImage/Postman.png)
@@ -37,7 +41,7 @@ Below are the example screenshots from this project's outputs:
 
 - Console run showing the age distribution report and processing summary:
 
-![Console output](readmeImage/image.png)
+![Console output](readmeImage/console.png)
 
 If the screenshots are not present, add them to `docs/screenshots/` with the filenames above to show them inline in this README.
 
