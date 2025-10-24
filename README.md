@@ -43,5 +43,4 @@ Below are the example screenshots from this project's outputs:
 
 ![Console output](readmeImage/console.png)
 
-If the screenshots are not present, add them to `docs/screenshots/` with the filenames above to show them inline in this README.
 
