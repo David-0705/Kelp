@@ -29,15 +29,15 @@ Below are the example screenshots from this project's outputs:
 
 - API request/response (Postman):
 
-![API Request/Response](readmeImage\Postman.png)
+![API Request/Response](readmeImage/Postman.png)
 
 - Database (psql) view of inserted rows (address and additional_info JSON columns):
 
-![Database output](readmeImage\Postgres.png)
+![Database output](readmeImage/Postgres.png)
 
 - Console run showing the age distribution report and processing summary:
 
-![Console output](readmeImage\image.png)
+![Console output](readmeImage/image.png)
 
 If the screenshots are not present, add them to `docs/screenshots/` with the filenames above to show them inline in this README.
 
