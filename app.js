@@ -103,21 +103,9 @@ async function processCSVFile(csvPath) {
   await flushBatch();
   console.log(`✅ CSV processed. Total rows inserted: ${totalProcessed}`);
 
-  // ---------------- Get age distribution from DB ----------------
-//   const distributionSql = `
-//     SELECT
-//       SUM(CASE WHEN age < 20 THEN 1 ELSE 0 END) AS lt20,
-//       SUM(CASE WHEN age >= 20 AND age <= 40 THEN 1 ELSE 0 END) AS b20_40,
-//       SUM(CASE WHEN age > 40 AND age <= 60 THEN 1 ELSE 0 END) AS b40_60,
-//       SUM(CASE WHEN age > 60 THEN 1 ELSE 0 END) AS gt60
-//     FROM public.users;
-//   `;
-//   const { rows } = await pool.query(distributionSql);
-//   const ageDistribution = rows[0];
-//   console.log("✅ Age distribution from DB:", ageDistribution);
 
-//   return { totalProcessed, ageDistribution };
-// }
+  
+  //Get age distribution from DB
 
 const distributionSql = `
   SELECT
