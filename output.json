@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Rohit Prasad",
+    "age": 35,
+    "address": {
+      "line1": "A-563 Rakshak Society, New Pune Road",
+      "line2": "",
+      "city": "Pune",
+      "state": "Maharashtra"
+    },
+    "additional_info": {
+      "gender": "male",
+      "title": {
+        "customField": "Engineer"
+      }
+    }
+  },
+  {
+    "name": "Jane, M. O'Connor",
+    "age": 28,
+    "address": {
+      "line1": "Flat 12",
+      "line2": "Block B",
+      "city": "Dublin",
+      "state": "County Dublin"
+    },
+    "additional_info": {
+      "gender": "female",
+      "title": {
+        "customField": "Sr. Dev"
+      }
+    }
+  },
+  {
+    "name": "Bob Smith",
+    "age": 17,
+    "address": {
+      "line1": "",
+      "line2": "PO Box 55",
+      "city": "Smalltown",
+      "state": "StateX"
+    },
+    "additional_info": {
+      "gender": "male",
+      "title": {
+        "customField": "Student"
+      }
+    }
+  },
+  {
+    "name": "Li Wang",
+    "age": 45,
+    "address": {
+      "line1": "1234 Elm St",
+      "line2": "Apt 5B",
+      "city": "Beijing",
+      "state": "Beijing"
+    },
+    "additional_info": {
+      "gender": "female",
+      "title": {
+        "customField": "Manager"
+      }
+    }
+  },
+  {
+    "name": "Maria Gonzalez",
+    "age": 30,
+    "address": {
+      "line1": "Calle 45 #678",
+      "line2": "Colonia Centro",
+      "city": "Mexico City",
+      "state": "CDMX"
+    },
+    "additional_info": {
+      "gender": "female",
+      "title": {
+        "customField": "Analyst"
+      }
+    }
+  }
+]
