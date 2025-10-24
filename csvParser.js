@@ -26,13 +26,13 @@ function parseCSVLineToFields(line) {
         break;
       }
       fields.push(field);
-      if (i < len && line[i] === ',') i++; // skip comma
+      if (i < len && line[i] === ',') i++; 
     } else {
       let start = i;
       while (i < len && line[i] !== ',') i++;
       let raw = line.slice(start, i).trim();
       fields.push(raw);
-      if (i < len && line[i] === ',') i++; // skip comma
+      if (i < len && line[i] === ',') i++; 
     }
   }
   return fields;
